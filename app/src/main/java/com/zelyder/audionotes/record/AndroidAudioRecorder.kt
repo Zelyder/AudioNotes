@@ -13,6 +13,7 @@ class AndroidAudioRecorder(
     private var recorder: MediaRecorder? = null
 
     private fun createRecorder(): MediaRecorder {
+        @Suppress("DEPRECATION")
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             MediaRecorder(context)
         } else MediaRecorder()
@@ -21,8 +22,8 @@ class AndroidAudioRecorder(
     override fun start(outputFile: File) {
         createRecorder().apply {
             setAudioSource(MediaRecorder.AudioSource.MIC)
-            setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)      // Quality of sound
-            setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+            setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
+            setAudioEncoder(MediaRecorder.AudioEncoder.AMR_WB)          // Quality of sound
             setOutputFile(FileOutputStream(outputFile).fd)
 
             prepare()

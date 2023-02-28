@@ -19,8 +19,10 @@ import androidx.core.app.ActivityCompat
 import com.zelyder.audionotes.playback.AndroidAudioPlayer
 import com.zelyder.audionotes.record.AndroidAudioRecorder
 import com.zelyder.audionotes.ui.theme.AudioNotesTheme
+import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val recorder by lazy {
