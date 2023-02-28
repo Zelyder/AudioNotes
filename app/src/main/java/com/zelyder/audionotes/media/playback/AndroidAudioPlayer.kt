@@ -1,4 +1,4 @@
-package com.zelyder.audionotes.playback
+package com.zelyder.audionotes.media.playback
 
 import android.content.Context
 import android.media.MediaPlayer

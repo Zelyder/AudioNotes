@@ -1,4 +1,4 @@
-package com.zelyder.audionotes.record
+package com.zelyder.audionotes.media.record
 
 import java.io.File
 

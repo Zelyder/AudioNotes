@@ -16,8 +16,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
-import com.zelyder.audionotes.playback.AndroidAudioPlayer
-import com.zelyder.audionotes.record.AndroidAudioRecorder
+import com.zelyder.audionotes.media.playback.AndroidAudioPlayer
+import com.zelyder.audionotes.media.record.AndroidAudioRecorder
 import com.zelyder.audionotes.ui.theme.AudioNotesTheme
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
