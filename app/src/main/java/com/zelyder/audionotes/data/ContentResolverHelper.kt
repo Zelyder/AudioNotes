@@ -18,7 +18,7 @@ constructor(@ApplicationContext val context: Context) {
     private val projection: Array<String> = arrayOf(
         MediaStore.Audio.AudioColumns.DISPLAY_NAME,
         MediaStore.Audio.AudioColumns._ID,
-        MediaStore.Audio.AudioColumns.DATA,
+        MediaStore.Audio.AudioColumns.DATE_ADDED,
         MediaStore.Audio.AudioColumns.DURATION,
         MediaStore.Audio.AudioColumns.TITLE,
     )
@@ -54,8 +54,8 @@ constructor(@ApplicationContext val context: Context) {
                 cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns._ID)
             val displayNameColumn =
                 cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DISPLAY_NAME)
-            val dataColumn =
-                cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DATA)
+            val dateColumn =
+                cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DATE_ADDED)
             val durationColumn =
                 cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DURATION)
             val titleColumn =
@@ -68,8 +68,8 @@ constructor(@ApplicationContext val context: Context) {
                     while (cursor.moveToNext()) {
                         val displayName = getString(displayNameColumn)
                         val id = getLong(idColumn)
-                        val data = getString(dataColumn)
-                        val duration = getInt(durationColumn)
+                        val date = getLong(dateColumn)
+                        val duration = getLong(durationColumn)
                         val title = getString(titleColumn)
                         val uri = ContentUris.withAppendedId(
                             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
@@ -77,7 +77,7 @@ constructor(@ApplicationContext val context: Context) {
                         )
 
                         audioList += Audio(
-                            uri, displayName, id, data, duration, title
+                            uri, displayName, id, date, duration, title
                         )
                     }
                 }

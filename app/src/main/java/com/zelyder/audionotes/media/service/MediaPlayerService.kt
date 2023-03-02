@@ -134,6 +134,7 @@ class MediaPlayerService : MediaBrowserServiceCompat() {
         extras: Bundle?,
         result: Result<Bundle>
     ) {
+        super.onCustomAction(action, extras, result)
         when (action) {
             AppConst.START_MEDIA_PLAY_ACTION -> {
                 mediaPlayerNotificationManager.showNotification(exoPlayer)

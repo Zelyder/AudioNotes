@@ -51,7 +51,7 @@ android {
 dependencies {
 
     implementation 'androidx.core:core-ktx:1.9.0'
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.5.1'
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleCompose"
     implementation 'androidx.activity:activity-compose:1.6.1'
     implementation "androidx.compose.ui:ui:$compose_ui_version"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_ui_version"
@@ -65,8 +65,10 @@ dependencies {
 
     implementation "com.google.dagger:hilt-android:2.44"
     implementation "androidx.media:media:1.6.0"
-    implementation 'com.google.android.exoplayer:exoplayer:2.18.3'
-    implementation 'com.google.android.exoplayer:extension-mediasession:2.18.3'
+    implementation "com.google.android.exoplayer:exoplayer:$exoplayer"
+    implementation "com.google.android.exoplayer:extension-mediasession:$exoplayer"
+    implementation "com.google.accompanist:accompanist-permissions:0.28.0"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleCompose"
     kapt "com.google.dagger:hilt-compiler:2.44"
 
 

@@ -12,10 +12,12 @@ import com.zelyder.audionotes.media.exoplayer.currentPosition
 import com.zelyder.audionotes.media.exoplayer.isPlaying
 import com.zelyder.audionotes.media.service.MediaPlayerService
 import com.zelyder.audionotes.repository.AudioRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@HiltViewModel
 class AudioViewModel @Inject constructor(
     private val repository: AudioRepository,
     serviceConnection: MediaPlayerServiceConnection
@@ -43,10 +45,11 @@ class AudioViewModel @Inject constructor(
     }
 
     private val serviceConnection = serviceConnection.also {
-
+        updatePlayback()
     }
 
-    val currentDuration = MediaPlayerService.currentDuration
+    val currentDuration: Long
+        get() = MediaPlayerService.currentDuration
 
     init {
         viewModelScope.launch {
