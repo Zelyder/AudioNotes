@@ -75,6 +75,18 @@ class AudioViewModel @Inject constructor(
         }
     }
 
+    fun startRecordingAudio(fileName: String) {
+        viewModelScope.launch {
+            repository.startRecordingAudio(fileName)
+        }
+    }
+
+    fun stopRecordingAudio() {
+        viewModelScope.launch {
+            repository.stopRecordingAudio()
+        }
+    }
+
     fun playAudio(currentAudio: Audio) {
         serviceConnection.playAudio(audioList)
         if (currentAudio.id == currentPlayingAudio.value?.id) {

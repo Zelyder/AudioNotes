@@ -60,7 +60,7 @@ class MediaSource
                 )
                 .putLong(
                     MediaMetadataCompat.METADATA_KEY_DURATION,
-                    audio.duration.toLong()
+                    audio.duration
                 )
                 .build()
         }

@@ -11,4 +11,12 @@ constructor(private val contentResolverHelper: ContentResolverHelper) {
     suspend fun getAudioData(): List<Audio> = withContext(Dispatchers.IO) {
         contentResolverHelper.getAudioData()
     }
+
+    suspend fun startRecordingAudio(fileName: String) =
+        withContext(Dispatchers.IO) {
+            contentResolverHelper.saveAudioToInternalStorage(fileName)
+        }
+    suspend fun stopRecordingAudio() = withContext(Dispatchers.IO){
+        contentResolverHelper.stopRecordingAudio()
+    }
 }
