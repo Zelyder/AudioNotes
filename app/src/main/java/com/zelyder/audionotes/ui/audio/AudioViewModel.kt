@@ -1,6 +1,7 @@
 package com.zelyder.audionotes.ui.audio
 
 import android.support.v4.media.MediaBrowserCompat
+import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -26,6 +27,11 @@ class AudioViewModel @Inject constructor(
     var currentPlaybackPosition = mutableStateOf(0L)
     var currentAudioProgress = mutableStateOf(0f)
 
+    val showDialog = mutableStateOf(false)
+    val isRecordingAudio = mutableStateOf(false)
+    val currentAudioName = mutableStateOf(defaultAudioName)
+
+
     lateinit var rootMediaId: String
 
     val currentPlayingAudio = serviceConnection.currentPlayingAudio
@@ -34,6 +40,10 @@ class AudioViewModel @Inject constructor(
     private val playbackState = serviceConnection.playbackState
     val isAudioPlaying: Boolean
         get() = playbackState.value?.isPlaying == true
+
+    private val defaultAudioName: String
+        get() = "Audio_${audioList.size + 1}"
+
 
     private val subscriptionCallback = object : MediaBrowserCompat.SubscriptionCallback() {
         override fun onChildrenLoaded(
@@ -48,12 +58,13 @@ class AudioViewModel @Inject constructor(
         updatePlayback()
     }
 
-    val currentDuration: Long
+    private val currentDuration: Long
         get() = MediaPlayerService.currentDuration
 
     init {
         viewModelScope.launch {
             audioList += getAndFormatAudioData()
+            Log.d("audio", "audioList = ${audioList.toList()}")
             isConnected.collect {
                 if (it) {
                     rootMediaId = serviceConnection.rootMediaId
@@ -75,15 +86,21 @@ class AudioViewModel @Inject constructor(
         }
     }
 
-    fun startRecordingAudio(fileName: String) {
+    private fun startRecordingAudio(fileName: String) {
         viewModelScope.launch {
             repository.startRecordingAudio(fileName)
+            isRecordingAudio.value = true
         }
     }
 
     fun stopRecordingAudio() {
         viewModelScope.launch {
             repository.stopRecordingAudio()
+            isRecordingAudio.value = false
+            repository.getLastAudio()?.let {
+                audioList += it
+                Log.d("audio", "Добавление $it")
+            }
         }
     }
 
@@ -144,6 +161,18 @@ class AudioViewModel @Inject constructor(
                 updatePlayback()
             }
         }
+    }
+
+    fun onOpenDialogClicked() {
+        showDialog.value = true
+    }
+
+    fun onDialogConfirm() {
+        startRecordingAudio(currentAudioName.value)
+    }
+
+    fun onDialogDismiss() {
+        currentAudioName.value = defaultAudioName
     }
 
     override fun onCleared() {

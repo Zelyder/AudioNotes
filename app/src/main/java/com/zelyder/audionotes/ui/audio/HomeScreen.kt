@@ -7,8 +7,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,17 +27,17 @@ fun HomeScreen(
     currentPoint: Long,
     onProgressChange: (Float) -> Unit,
     isAudioPlaying: Boolean,
+    isStartRecord: Boolean,
     currentPlayingAudio: Audio?,
     onStart: (Audio) -> Unit,
-    onStartRecorder: (String) -> Unit,
-    onStopRecorder: () -> Unit
+    onStartRecorder: () -> Unit,
+    onStopRecorder: () -> Unit,
 ) {
-    val isStartRecord = remember { mutableStateOf(false) }
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
                 content = {
-                    if (isStartRecord.value)
+                    if (isStartRecord)
                         Icon(
                             painterResource(id = R.drawable.ic_baseline_record_24),
                             contentDescription = "Начать запись"
@@ -50,12 +48,11 @@ fun HomeScreen(
                     )
                 },
                 onClick = {
-                    if (isStartRecord.value) {
-                        onStopRecorder.invoke()
+                    if (isStartRecord) {
+                        onStopRecorder()
                     } else {
-                        onStartRecorder.invoke(UUID.randomUUID().toString().take(8))
+                        onStartRecorder()
                     }
-                    isStartRecord.value = !isStartRecord.value
                 }
             )
         },
@@ -106,6 +103,8 @@ fun HomeScreen(
 
 }
 
+
+
 private fun formatDate(timestamp: Long): String {
     val dateFormat = SimpleDateFormat("MM.dd.yyyy в HH:mm", Locale.getDefault())
     val todayFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
@@ -148,7 +147,7 @@ fun AudioItem(
                     horizontalAlignment = Alignment.Start
                 ) {
                     Text(
-                        text = audio.title,
+                        text = audio.displayName,
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.body1,
                         overflow = TextOverflow.Clip,

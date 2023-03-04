@@ -28,7 +28,10 @@ constructor(@ApplicationContext val context: Context) {
         AndroidAudioRecorder(context)
     }
 
+    private var lastAudioFile: File? = null
+
     private var mCursor: Cursor? = null
+    private var i = 0L
 
     private val projection: Array<String> = arrayOf(
         MediaStore.Audio.AudioColumns.DISPLAY_NAME,
@@ -52,10 +55,12 @@ constructor(@ApplicationContext val context: Context) {
         return loadAudioFromInternalStorage()
     }
 
-    private fun loadAudioFromInternalStorage(): List<Audio> {
-        val files = context.filesDir.listFiles()
-        var i = 0L
-        return files?.filter { it.canRead() && it.isFile && it.name.endsWith(".3gp") }?.map {
+    fun getLastAudio(): Audio? {
+        return fileToAudio(lastAudioFile)
+    }
+
+    private fun fileToAudio(file: File?): Audio? {
+        return file?.let {
             i++
             val mediaMediaRecorder = MediaMetadataRetriever()
             mediaMediaRecorder.setDataSource(it.path)
@@ -75,8 +80,6 @@ constructor(@ApplicationContext val context: Context) {
             if (timestamp > 0) {
                 timestamp += 10800000       // + 3 часа
             }
-
-
             Audio(
                 uri = uri,
                 displayName = displayName,
@@ -85,14 +88,23 @@ constructor(@ApplicationContext val context: Context) {
                 duration = duration?.toLong() ?: 0,
                 title = title ?: displayName
             )
+        }
+    }
+
+    private fun loadAudioFromInternalStorage(): List<Audio> {
+        val files = context.filesDir.listFiles()
+
+        return files?.filter { it.canRead() && it.isFile && it.name.endsWith(".3gp") }?.map {
+            fileToAudio(it)!!
         } ?: emptyList()
     }
 
     fun saveAudioToInternalStorage(fileName: String): Boolean {
         return try {
-            recorder.start(
-                File(context.filesDir, "${fileName}.3gp")
-            )
+            File(context.filesDir, "${fileName}.3gp").also { file ->
+                recorder.start(file)
+                lastAudioFile = file
+            }
             true
         } catch (e: IOException) {
             e.printStackTrace()
@@ -151,7 +163,10 @@ constructor(@ApplicationContext val context: Context) {
         return filePath
     }
 
-    fun stopRecordingAudio() {
+    fun stopRecordingAudio(fileName: String? = null) {
+        fileName?.let {
+            lastAudioFile?.renameTo(File(context.filesDir, "${fileName}.3gp"))
+        }
         recorder.stop()
     }
 

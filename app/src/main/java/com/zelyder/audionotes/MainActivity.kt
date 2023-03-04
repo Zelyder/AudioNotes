@@ -10,15 +10,15 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zelyder.audionotes.media.service.HomeScreen
 import com.zelyder.audionotes.ui.audio.AudioViewModel
+import com.zelyder.audionotes.ui.components.InputDialog
 import com.zelyder.audionotes.ui.theme.AudioNotesTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -48,6 +48,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             AudioNotesTheme {
 
+
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -57,7 +58,18 @@ class MainActivity : ComponentActivity() {
                         val audioViewModel = viewModel(
                             modelClass = AudioViewModel::class.java
                         )
+
+
+                        InputDialog(
+                            title = "Название файла ",
+                            state = audioViewModel.showDialog,
+                            value = audioViewModel.currentAudioName,
+                            onDismiss = audioViewModel::onDialogDismiss,
+                            onConfirm = audioViewModel::onDialogConfirm,
+                        )
+
                         val audioList = audioViewModel.audioList
+
                         HomeScreen(
                             audioList = audioList,
                             progress = audioViewModel.currentAudioProgress.value,
@@ -66,13 +78,14 @@ class MainActivity : ComponentActivity() {
                                 audioViewModel.seekTo(it)
                             },
                             isAudioPlaying = audioViewModel.isAudioPlaying,
+                            isStartRecord = audioViewModel.isRecordingAudio.value,
                             currentPlayingAudio = audioViewModel
                                 .currentPlayingAudio.value,
                             onStart = {
                                 audioViewModel.playAudio(it)
                             },
-                            onStartRecorder = { fileName ->
-                                audioViewModel.startRecordingAudio(fileName)
+                            onStartRecorder = {
+                                audioViewModel.onOpenDialogClicked()
                             },
                             onStopRecorder = {
                                 audioViewModel.stopRecordingAudio()
@@ -125,5 +138,28 @@ class MainActivity : ComponentActivity() {
         if (permissionsToRequest.isNotEmpty()) {
             permissionLauncher.launch(permissionsToRequest.toTypedArray())
         }
+    }
+}
+
+@Composable
+fun SimpleAlertDialog(
+    show: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    if (show) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            confirmButton = {
+                TextButton(onClick = onConfirm)
+                { Text(text = "OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss)
+                { Text(text = "Cancel") }
+            },
+            title = { Text(text = "Saving audio") },
+            text = { Text(text = "Should I continue with the requested action?") }
+        )
     }
 }
