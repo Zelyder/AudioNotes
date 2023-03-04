@@ -1,7 +1,9 @@
 package com.zelyder.audionotes.media.service
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -32,6 +34,7 @@ fun HomeScreen(
     onStart: (Audio) -> Unit,
     onStartRecorder: () -> Unit,
     onStopRecorder: () -> Unit,
+    onDeleteAudio: (Audio) -> Unit
 ) {
     Scaffold(
         floatingActionButton = {
@@ -91,6 +94,9 @@ fun HomeScreen(
                             onItemClick = {
                                 onStart.invoke(audio)
                             },
+                            onLongItemClick = {
+                                onDeleteAudio.invoke(audio)
+                            },
                             progress = if (audio == currentPlayingAudio) progress else 0f,
                             currentPoint = if (audio == currentPlayingAudio) currentPoint else 0,
                         )
@@ -102,7 +108,6 @@ fun HomeScreen(
     }
 
 }
-
 
 
 private fun formatDate(timestamp: Long): String {
@@ -119,6 +124,7 @@ private fun formatDate(timestamp: Long): String {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AudioItem(
     audio: Audio,
@@ -126,6 +132,7 @@ fun AudioItem(
     isPlaying: Boolean,
     onProgressChange: (Float) -> Unit,
     onItemClick: (id: Long) -> Unit,
+    onLongItemClick: (id: Long) -> Unit,
     progress: Float = 0.0f,
     currentPoint: Long = 0L
 ) {
@@ -134,7 +141,10 @@ fun AudioItem(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth()
-                .clickable { onItemClick.invoke(audio.id) }
+                .combinedClickable(
+                    onClick = { onItemClick.invoke(audio.id) },
+                    onLongClick = { onLongItemClick.invoke(audio.id) }
+                )
         ) {
             Row(
                 modifier = Modifier

@@ -256,8 +256,6 @@ class MediaPlayerService : MediaBrowserServiceCompat() {
         val indexToPlay = if (currentPlayingMedia == null) 0
         else mediaMetadata.indexOf(itemToPlay)
 
-
-
         exoPlayer.addListener(PlayerEventListener())
         exoPlayer.setMediaSource(mediaSource.asMediaSource(dataSourceFactory))
         exoPlayer.prepare()

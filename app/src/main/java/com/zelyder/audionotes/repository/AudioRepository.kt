@@ -21,6 +21,11 @@ constructor(private val contentResolverHelper: ContentResolverHelper) {
             contentResolverHelper.saveAudioToInternalStorage(fileName)
         }
 
+    suspend fun deleteAudioFile(fileName: String) =
+        withContext(Dispatchers.IO) {
+            contentResolverHelper.deleteAudioFromInternalStorage(fileName)
+        }
+
     suspend fun stopRecordingAudio() = withContext(Dispatchers.IO) {
         contentResolverHelper.stopRecordingAudio()
     }

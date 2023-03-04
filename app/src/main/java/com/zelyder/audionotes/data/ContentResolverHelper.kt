@@ -1,15 +1,7 @@
 package com.zelyder.audionotes.data
 
-import android.content.ContentUris
-import android.content.ContentValues
 import android.content.Context
-import android.database.Cursor
 import android.media.MediaMetadataRetriever
-import android.net.Uri
-import android.os.Build
-import android.os.Environment
-import android.provider.MediaStore
-import android.util.Log
 import androidx.annotation.WorkerThread
 import androidx.core.net.toUri
 import com.zelyder.audionotes.data.model.Audio
@@ -29,27 +21,7 @@ constructor(@ApplicationContext val context: Context) {
     }
 
     private var lastAudioFile: File? = null
-
-    private var mCursor: Cursor? = null
-    private var i = 0L
-
-    private val projection: Array<String> = arrayOf(
-        MediaStore.Audio.AudioColumns.DISPLAY_NAME,
-        MediaStore.Audio.AudioColumns._ID,
-        MediaStore.Audio.AudioColumns.DATE_ADDED,
-        MediaStore.Audio.AudioColumns.DURATION,
-        MediaStore.Audio.AudioColumns.TITLE,
-    )
-
-    private var selectionClause: String? =
-        "${
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-                MediaStore.Audio.AudioColumns.IS_RECORDING else
-                MediaStore.Audio.AudioColumns.IS_MUSIC
-        } = ? "
-    private var selectionArg = arrayOf("1")
-    private val sortOrder = "${MediaStore.Audio.AudioColumns.DISPLAY_NAME} ASC"
-
+    private var index = 0L
     @WorkerThread
     fun getAudioData(): List<Audio> {
         return loadAudioFromInternalStorage()
@@ -61,7 +33,7 @@ constructor(@ApplicationContext val context: Context) {
 
     private fun fileToAudio(file: File?): Audio? {
         return file?.let {
-            i++
+            index++
             val mediaMediaRecorder = MediaMetadataRetriever()
             mediaMediaRecorder.setDataSource(it.path)
             val displayName = it.name
@@ -83,7 +55,7 @@ constructor(@ApplicationContext val context: Context) {
             Audio(
                 uri = uri,
                 displayName = displayName,
-                id = i,
+                id = index,
                 date = timestamp,
                 duration = duration?.toLong() ?: 0,
                 title = title ?: displayName
@@ -112,38 +84,9 @@ constructor(@ApplicationContext val context: Context) {
         }
     }
 
-    fun startRecordingAudio(fileName: String): Boolean {
-        val audioCollection = sdk29AndUp {
-            MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
-        } ?: MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-
-        val contentValues = ContentValues().apply {
-            put(MediaStore.Audio.Media.DISPLAY_NAME, fileName)
-            put(MediaStore.Audio.Media.TITLE, fileName)
-            put(MediaStore.Audio.Media.MIME_TYPE, "audio/3gpp")
-            put(
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-                    MediaStore.Audio.AudioColumns.IS_RECORDING else
-                    MediaStore.Audio.AudioColumns.IS_MUSIC, true
-            )
-            sdk29AndUp {
-                put(
-                    MediaStore.Audio.Media.RELATIVE_PATH,
-                    "${Environment.DIRECTORY_MUSIC}/AudioRecorder"
-                )
-            } ?: put(
-                MediaStore.Audio.Media.DATA, "${
-                    Environment.getExternalStorageDirectory()
-                        .absolutePath
-                }/Music/AudioRecorder/$fileName"
-            )
-        }
-
+    fun deleteAudioFromInternalStorage(fileName: String): Boolean {
         return try {
-            context.contentResolver.insert(audioCollection, contentValues)?.also { uri ->
-                val recordingFilePath = getFilePathFromUri(uri)
-                recorder.start(File(recordingFilePath))
-            } ?: throw IOException("Couldn't create MediaStore entry")
+            context.deleteFile(fileName)
             true
         } catch (e: IOException) {
             e.printStackTrace()
@@ -151,78 +94,10 @@ constructor(@ApplicationContext val context: Context) {
         }
     }
 
-    private fun getFilePathFromUri(uri: Uri): String {
-        val projection = arrayOf(MediaStore.Audio.Media.DATA)
-        val cursor = context.contentResolver.query(uri, projection, null, null, null)
-        val filePath = if (cursor != null && cursor.moveToFirst()) {
-            cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA))
-        } else {
-            ""
-        }
-        cursor?.close()
-        return filePath
-    }
-
     fun stopRecordingAudio(fileName: String? = null) {
         fileName?.let {
             lastAudioFile?.renameTo(File(context.filesDir, "${fileName}.3gp"))
         }
         recorder.stop()
-    }
-
-
-    private fun getCursorData(): MutableList<Audio> {
-        val audioList = mutableListOf<Audio>()
-
-        mCursor = context.contentResolver.query(
-            context.filesDir.toUri(),
-            projection,
-            selectionClause,
-            selectionArg,
-            sortOrder
-        )
-
-
-        mCursor?.use { cursor ->
-            val idColumn =
-                cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns._ID)
-            val displayNameColumn =
-                cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DISPLAY_NAME)
-            val dateColumn =
-                cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DATE_ADDED)
-            val durationColumn =
-                cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DURATION)
-            val titleColumn =
-                cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TITLE)
-
-            cursor.apply {
-                if (count == 0) {
-                    Log.e("Cursor", "getCursorData: Cursor is Empty")
-                } else {
-                    while (cursor.moveToNext()) {
-                        val displayName = getString(displayNameColumn)
-                        val id = getLong(idColumn)
-                        val date = getLong(dateColumn)
-                        val duration = getLong(durationColumn)
-                        val title = getString(titleColumn)
-                        val uri = ContentUris.withAppendedId(
-                            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                            id
-                        )
-
-                        audioList += Audio(
-                            uri = uri,
-                            displayName = displayName,
-                            id = id,
-                            date = date,
-                            duration = duration,
-                            title = title
-                        )
-                    }
-                }
-
-            }
-        }
-        return audioList
     }
 }

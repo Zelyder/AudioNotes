@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
@@ -28,6 +29,9 @@ class MainActivity : ComponentActivity() {
     private var readPermissionGranted = false
     private var writePermissionGranted = false
     private var recordAudioPermissionGranted = false
+    private val allPermissionGranted
+        get() = readPermissionGranted && writePermissionGranted && recordAudioPermissionGranted
+    private val allPermissionState = mutableStateOf(allPermissionGranted)
     private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,18 +47,16 @@ class MainActivity : ComponentActivity() {
                 permissions[Manifest.permission.WRITE_EXTERNAL_STORAGE] ?: writePermissionGranted
             recordAudioPermissionGranted =
                 permissions[Manifest.permission.RECORD_AUDIO] ?: recordAudioPermissionGranted
+            allPermissionState.value = allPermissionGranted
         }
         updateOrRequestPermission()
         setContent {
             AudioNotesTheme {
-
-
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    if (readPermissionGranted && writePermissionGranted && recordAudioPermissionGranted) {
+                    if (allPermissionState.value) {
                         val audioViewModel = viewModel(
                             modelClass = AudioViewModel::class.java
                         )
@@ -89,6 +91,9 @@ class MainActivity : ComponentActivity() {
                             },
                             onStopRecorder = {
                                 audioViewModel.stopRecordingAudio()
+                            },
+                            onDeleteAudio = {audio ->
+                                audioViewModel.deleteAudio(audio)
                             }
                         )
                     } else {
@@ -138,28 +143,6 @@ class MainActivity : ComponentActivity() {
         if (permissionsToRequest.isNotEmpty()) {
             permissionLauncher.launch(permissionsToRequest.toTypedArray())
         }
-    }
-}
-
-@Composable
-fun SimpleAlertDialog(
-    show: Boolean,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit
-) {
-    if (show) {
-        AlertDialog(
-            onDismissRequest = onDismiss,
-            confirmButton = {
-                TextButton(onClick = onConfirm)
-                { Text(text = "OK") }
-            },
-            dismissButton = {
-                TextButton(onClick = onDismiss)
-                { Text(text = "Cancel") }
-            },
-            title = { Text(text = "Saving audio") },
-            text = { Text(text = "Should I continue with the requested action?") }
-        )
+        allPermissionState.value = allPermissionGranted
     }
 }

@@ -86,6 +86,14 @@ class AudioViewModel @Inject constructor(
         }
     }
 
+    fun deleteAudio(audio: Audio) {
+        viewModelScope.launch {
+            repository.deleteAudioFile(audio.title)
+            audioList -= audio
+        }
+    }
+
+
     private fun startRecordingAudio(fileName: String) {
         viewModelScope.launch {
             repository.startRecordingAudio(fileName)

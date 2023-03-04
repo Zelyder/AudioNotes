@@ -54,10 +54,6 @@ class MediaSource
                     MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE,
                     audio.displayName
                 )
-                .putString(
-                    MediaMetadataCompat.METADATA_KEY_MEDIA_ID,
-                    audio.id.toString()
-                )
                 .putLong(
                     MediaMetadataCompat.METADATA_KEY_DURATION,
                     audio.duration
@@ -124,7 +120,6 @@ enum class AudioSourceState {
     STATE_INITIALIZING,
     STATE_INITIALIZED,
     STATE_ERROR,
-
 }
 
 typealias OnReadyListener = (Boolean) -> Unit
