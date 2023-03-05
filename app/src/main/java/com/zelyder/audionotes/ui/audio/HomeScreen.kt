@@ -1,5 +1,6 @@
-package com.zelyder.audionotes.media.service
+package com.zelyder.audionotes.ui.audio
 
+import androidx.compose.animation.*
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -9,10 +10,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -30,6 +33,9 @@ fun HomeScreen(
     onProgressChange: (Float) -> Unit,
     isAudioPlaying: Boolean,
     isStartRecord: Boolean,
+    seconds: String,
+    minutes: String,
+    hours: String,
     currentPlayingAudio: Audio?,
     onStart: (Audio) -> Unit,
     onStartRecorder: () -> Unit,
@@ -43,11 +49,12 @@ fun HomeScreen(
                     if (isStartRecord)
                         Icon(
                             painterResource(id = R.drawable.ic_baseline_record_24),
-                            contentDescription = "Начать запись"
+                            contentDescription = stringResource(id = R.string.recording_start),
+                            tint = Color.Red
                         )
                     else Icon(
                         painterResource(id = R.drawable.ic_baseline_mic_none_24),
-                        contentDescription = "Остановить запись"
+                        contentDescription = stringResource(id = R.string.recording_stop)
                     )
                 },
                 onClick = {
@@ -74,12 +81,24 @@ fun HomeScreen(
                     end = 16.dp
                 )
             ) {
-                Text(
-                    text = "Ваши записи",
-                    style = MaterialTheme.typography.h4,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Spacer(modifier = Modifier.height(28.dp))
+                if (isStartRecord) {
+                    Spacer(modifier = Modifier.height(34.dp))
+                    RecordingTimer(
+                        seconds = seconds,
+                        minutes = minutes,
+                        hours = hours
+                    )
+                    Spacer(modifier = Modifier.height(34.dp))
+                } else {
+                    Text(
+                        text = stringResource(id = R.string.home_screen_title),
+                        style = MaterialTheme.typography.h4,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(modifier = Modifier.height(28.dp))
+                }
+
+
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -107,6 +126,42 @@ fun HomeScreen(
         }
     }
 
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun RecordingTimer(
+    modifier: Modifier = Modifier,
+    seconds: String,
+    minutes: String,
+    hours: String,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        val numberTransitionSpec: AnimatedContentScope<String>.() -> ContentTransform = {
+            slideInVertically(initialOffsetY = { it }) +
+                    fadeIn() with slideOutVertically(targetOffsetY = { -it }) +
+                    fadeOut() using SizeTransform(false)
+        }
+        CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.h3) {
+            AnimatedContent(targetState = hours, transitionSpec = numberTransitionSpec) {
+                Text(text = it)
+            }
+            Text(text = ":")
+            AnimatedContent(targetState = minutes, transitionSpec = numberTransitionSpec) {
+                Text(text = it)
+            }
+            Text(text = ":")
+            AnimatedContent(targetState = seconds, transitionSpec = numberTransitionSpec) {
+                Text(text = it)
+            }
+        }
+
+
+    }
 }
 
 

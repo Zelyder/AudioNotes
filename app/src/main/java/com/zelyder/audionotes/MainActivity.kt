@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.zelyder.audionotes.media.service.HomeScreen
+import com.zelyder.audionotes.ui.audio.HomeScreen
 import com.zelyder.audionotes.ui.audio.AudioViewModel
 import com.zelyder.audionotes.ui.components.ConfirmDialog
 import com.zelyder.audionotes.ui.components.InputDialog
@@ -90,13 +90,16 @@ class MainActivity : ComponentActivity() {
                             },
                             isAudioPlaying = audioViewModel.isAudioPlaying,
                             isStartRecord = audioViewModel.isRecordingAudio.value,
+                            seconds = audioViewModel.seconds.value,
+                            minutes = audioViewModel.minutes.value,
+                            hours = audioViewModel.hours.value,
                             currentPlayingAudio = audioViewModel
                                 .currentPlayingAudio.value,
                             onStart = {
                                 audioViewModel.playAudio(it)
                             },
                             onStartRecorder = {
-                                audioViewModel.showFileNameDialog.value = true
+                                audioViewModel.openDialogFileNameConfirm()
                             },
                             onStopRecorder = {
                                 audioViewModel.stopRecordingAudio()

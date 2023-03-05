@@ -17,7 +17,11 @@ import com.zelyder.audionotes.repository.AudioRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.*
 import javax.inject.Inject
+import kotlin.concurrent.fixedRateTimer
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class AudioViewModel @Inject constructor(
@@ -47,7 +51,6 @@ class AudioViewModel @Inject constructor(
     private val defaultAudioName: String
         get() = "Audio_${audioList.size + 1}"
 
-
     private val subscriptionCallback = object : MediaBrowserCompat.SubscriptionCallback() {
         override fun onChildrenLoaded(
             parentId: String,
@@ -64,9 +67,16 @@ class AudioViewModel @Inject constructor(
     private val currentDuration: Long
         get() = MediaPlayerService.currentDuration
 
+    private var time: Duration = Duration.ZERO
+    private lateinit var timer: Timer
+    var seconds = mutableStateOf("00")
+    var minutes = mutableStateOf("00")
+    var hours = mutableStateOf("00")
+
     init {
         viewModelScope.launch {
             audioList += getAndFormatAudioData()
+            currentAudioName.value = defaultAudioName
             Log.d("audio", "audioList = ${audioList.toList()}")
             isConnected.collect {
                 if (it) {
@@ -96,18 +106,36 @@ class AudioViewModel @Inject constructor(
 
     private fun startRecordingAudio(fileName: String) {
         viewModelScope.launch {
+            timer = fixedRateTimer(initialDelay = 1000L, period = 1000L) {
+                time = time.plus(1.seconds)
+                updateTimeStates()
+            }
             repository.startRecordingAudio(fileName)
             isRecordingAudio.value = true
         }
     }
 
+    private fun updateTimeStates() {
+        time.toComponents { hours, minutes, seconds, _ ->
+            this@AudioViewModel.seconds.value = seconds.pad()
+            this@AudioViewModel.minutes.value = minutes.pad()
+            this@AudioViewModel.hours.value = hours.toInt().pad()
+        }
+    }
+
+    private fun Int.pad(): String {
+        return this.toString().padStart(2, '0')
+    }
+
     fun stopRecordingAudio() {
         viewModelScope.launch {
+            timer.cancel()
+            time = Duration.ZERO
+            updateTimeStates()
             repository.stopRecordingAudio()
             isRecordingAudio.value = false
             repository.getLastAudio()?.let {
                 audioList += it
-                Log.d("audio", "Добавление $it")
                 serviceConnection.refreshMediaBrowserChildren()
             }
         }
@@ -164,6 +192,11 @@ class AudioViewModel @Inject constructor(
                 serviceConnection.refreshMediaBrowserChildren()
             }
         }
+    }
+
+    fun openDialogFileNameConfirm() {
+        currentAudioName.value = defaultAudioName
+        showFileNameDialog.value = true
     }
 
     fun onDialogFileNameConfirm() {
