@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Аудио заметки</string>
+    <string name="home_screen_title">Ваши записи</string>
+    <string name="notification_channel">Сейчас поигрывается</string>
+    <string name="notification_channel_description">Показывает, какая музыка сейчас играет в приложении</string>
+    <string name="notification_skip_to_previous">Перейти к предыдущуму треку</string>
+    <string name="notification_skip_to_next">Перейти к следующему треку</string>
+    <string name="notification_play">Воспроизвести</string>
+    <string name="notification_pause">Пауза</string>
+    <string name="recording_stop">Остановить запись</string>
+    <string name="recording_start">Начать запись</string>
+    <string name="full_date_format">MM.dd.yyyy в HH:mm</string>
+    <string name="today_date_text">сегодня в</string>
+    <string name="no_permissions_text">Предоставьте разрешения для использование этого приложения</string>
+    <string name="request_permissions">Запросить разрешения</string>
+    <string name="grant_permission">Предоставить разрешение</string>
+    <string name="permission_record_audio_permanently_text">"Кажется, вы отказались от разрешения на запись аудио. Этому приложению требуется доступ к вашему микрофону, чтобы вы могли добавить запись. Перейдите к настройкам, чтобы предоставить его. "</string>
+    <string name="permission_record_audio_text">Этому приложению требуется доступ к вашему микрофону, чтобы вы могли добавить запись.</string>
+    <string name="dialog_confirm">ОК</string>
+    <string name="dialog_cancel">Отмена</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
+    <string name="dialog_confirmation_title">Подтвердить действие</string>
+    <string name="dialog_confirmation_delete_text">Вы уверены, что хотите удалить %s?</string>
+    <string name="dialog_input_filename_title">Имя файла</string>
+    <string name="dialog_permission_title">Требуется разрешение</string>
+    <string name="error_media_not_found">Не удалось найти запрошенное аудио.</string>
+    <string name="generic_error">Приложение обнаружило непредвиденную ошибку.</string>
+    <string name="unknown">Неизвестный</string>
+</resources>

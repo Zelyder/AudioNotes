@@ -1,3 +1,48 @@
 <resources>
     <string name="app_name">Audio notes</string>
+    <string name="unknown">Unknown</string>
+    <string name="home_screen_title">Your recordings</string>
+
+
+    <!-- Notification Channel -->
+    <string name="notification_channel">Now Playing</string>
+    <string name="notification_channel_description">Shows what music is currently playing in our App</string>
+
+    <!-- Notification actions -->
+    <string name="notification_skip_to_previous">Skip to previous track</string>
+    <string name="notification_skip_to_next">Skip to next track</string>
+    <string name="notification_play">Play</string>
+    <string name="notification_pause">Pause</string>
+    <!-- Recording actions -->
+    <string name="recording_stop">Stop recording</string>
+    <string name="recording_start">Start recording</string>
+    <!-- Time format -->
+    <string name="full_date_format">MM.dd.yyyy at HH:mm</string>
+    <string name="today_date_format" translatable="false">HH:mm</string>
+    <string name="today_date_text">today at</string>
+    <string name="time_separator" translatable="false">/</string>
+    <!-- Permissions -->
+    <string name="no_permissions_text">Grant permissions first to use this app</string>
+    <string name="request_permissions">Request permissions</string>
+    <string name="grant_permission">Grant permission</string>
+    <string name="permission_record_audio_permanently_text">It seems you permanently declined audio
+        record permission. This app needs access to your microphone so that your can add recording. You can go to the settings to grant it.</string>
+    <string name="permission_record_audio_text">This app needs access to your microphone so         that your can add recording.</string>
+
+
+    <!-- Dialogs -->
+    <string name="dialog_confirm">OK</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="dialog_confirmation_title">Confirm action</string>
+    <string name="dialog_confirmation_delete_text">Are you sure to delete %s?</string>
+    <string name="dialog_input_filename_title">File name</string>
+    <string name="dialog_permission_title">Permission required</string>
+
+    <!-- Error messages -->
+    <string name="error_media_not_found">Could not locate requested media.</string>
+    <string name="generic_error">The application has encountered an unexpected error.</string>
+
+
 </resources>
