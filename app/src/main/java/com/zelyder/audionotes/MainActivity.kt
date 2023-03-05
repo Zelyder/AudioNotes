@@ -16,6 +16,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.zelyder.audionotes.ui.audio.AudioViewModel
 import com.zelyder.audionotes.ui.audio.HomeScreen
 import com.zelyder.audionotes.ui.components.ConfirmDialog
@@ -42,6 +44,7 @@ class MainActivity : ComponentActivity() {
         updatePermission()
         setContent {
             AudioNotesTheme {
+                MainContent()
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
@@ -159,6 +162,12 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    @Composable
+    fun MainContent() {
+        val systemUiController = rememberSystemUiController()
+        systemUiController.setStatusBarColor(MaterialTheme.colors.background)
     }
 
     private fun updatePermission() {

@@ -67,8 +67,8 @@ dependencies {
     implementation "androidx.media:media:1.6.0"
     implementation "com.google.android.exoplayer:exoplayer:$exoplayer"
     implementation "com.google.android.exoplayer:extension-mediasession:$exoplayer"
-    implementation "com.google.accompanist:accompanist-permissions:0.28.0"
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleCompose"
+    implementation "com.google.accompanist:accompanist-systemuicontroller:0.28.0"
     kapt "com.google.dagger:hilt-compiler:2.44"
 
 
