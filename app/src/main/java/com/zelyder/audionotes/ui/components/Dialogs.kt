@@ -1,5 +1,6 @@
 package com.zelyder.audionotes.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,6 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.zelyder.audionotes.R
 
@@ -22,7 +25,7 @@ fun CommonDialog(
     cancelText: String = stringResource(id = R.string.dialog_cancel),
     content: @Composable (() -> Unit)? = null
 ) {
-    if (state.value){
+    if (state.value) {
         AlertDialog(
             onDismissRequest = {
                 onDismiss()
@@ -104,3 +107,54 @@ fun ConfirmDialog(
     }
 
 }
+
+@Composable
+fun PermissionDialog(
+    permission: PermissionTextProvider,
+    isPermanentlyDeclined: Boolean,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    onGoToAppSettingsClick: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(text = stringResource(id = R.string.dialog_permission_title))
+        },
+        buttons = {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Divider()
+                Text(
+                    text = if (isPermanentlyDeclined) {
+                        stringResource(id = R.string.grant_permission)
+                    } else {
+                        stringResource(id = R.string.dialog_confirm)
+                    },
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            if (isPermanentlyDeclined) {
+                                onGoToAppSettingsClick()
+                            } else {
+                                onConfirm()
+                            }
+                        }
+                        .padding(16.dp)
+                )
+            }
+        },
+        text = {
+            Text(
+                text = stringResource(
+                    id = permission.getDescriptionResourceId(isPermanentlyDeclined)
+                )
+            )
+        }
+
+    )
+}
+

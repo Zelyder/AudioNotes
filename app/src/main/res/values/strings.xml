@@ -19,6 +19,15 @@
     <!-- Time format -->
     <string name="full_date_format">MM.dd.yyyy at HH:mm</string>
     <string name="today_date_format">today at HH:mm</string>
+    <!-- Permissions -->
+    <string name="no_permissions_text">Grant permissions first to use this app</string>
+    <string name="request_permissions">Request permissions</string>
+    <string name="grant_permission">Grant permission</string>
+    <string name="permission_record_audio_permanently_text">It seems you permanently declined audio
+        record permission. You can go to the settings to grant it.</string>
+    <string name="permission_record_audio_text">This app needs access to your microphone so
+        that your can add recording.</string>
+
 
     <!-- Dialogs -->
     <string name="dialog_confirm">OK</string>
@@ -27,6 +36,8 @@
     <string name="no">No</string>
     <string name="dialog_confirmation_title">Confirm action</string>
     <string name="dialog_confirmation_delete_text">Are you sure to delete %s?</string>
+    <string name="dialog_input_filename_title">File name</string>
+    <string name="dialog_permission_title">Permission required</string>
 
     <!-- Error messages -->
     <string name="error_media_not_found">Could not locate requested media.</string>

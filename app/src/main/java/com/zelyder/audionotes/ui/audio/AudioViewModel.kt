@@ -37,6 +37,7 @@ class AudioViewModel @Inject constructor(
     val isRecordingAudio = mutableStateOf(false)
     val currentAudioName = mutableStateOf(defaultAudioName)
     val audioToDelete: MutableState<Audio?> = mutableStateOf(null)
+    val visiblePermissionDialogQueue = mutableStateListOf<String>()
 
 
     lateinit var rootMediaId: String
@@ -96,6 +97,19 @@ class AudioViewModel @Inject constructor(
             it.copy(
                 displayName = displayName
             )
+        }
+    }
+
+    fun dismissPermissionDialog() {
+        visiblePermissionDialogQueue.removeLast()
+    }
+
+    fun onPermissionResult(
+        permission: String,
+        isGranted: Boolean
+    ) {
+        if (!isGranted) {
+            visiblePermissionDialogQueue.add(0, permission)
         }
     }
 

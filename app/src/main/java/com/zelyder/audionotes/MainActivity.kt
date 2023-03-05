@@ -1,69 +1,72 @@
 package com.zelyder.audionotes
 
 import android.Manifest
+import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.Button
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.zelyder.audionotes.ui.audio.HomeScreen
 import com.zelyder.audionotes.ui.audio.AudioViewModel
+import com.zelyder.audionotes.ui.audio.HomeScreen
 import com.zelyder.audionotes.ui.components.ConfirmDialog
 import com.zelyder.audionotes.ui.components.InputDialog
+import com.zelyder.audionotes.ui.components.PermissionDialog
+import com.zelyder.audionotes.ui.components.RecordAudioPermissionTextProvider
 import com.zelyder.audionotes.ui.theme.AudioNotesTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private var readPermissionGranted = false
-    private var writePermissionGranted = false
-    private var recordAudioPermissionGranted = false
-    private val allPermissionGranted
-        get() = readPermissionGranted && writePermissionGranted && recordAudioPermissionGranted
-    private val allPermissionState = mutableStateOf(allPermissionGranted)
-    private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
-
+    private var recordAudioPermissionGranted = mutableStateOf(false)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        permissionLauncher = registerForActivityResult(
-            ActivityResultContracts
-                .RequestMultiplePermissions()
-        ) { permissions ->
-            readPermissionGranted =
-                permissions[Manifest.permission.READ_EXTERNAL_STORAGE] ?: readPermissionGranted
-            writePermissionGranted =
-                permissions[Manifest.permission.WRITE_EXTERNAL_STORAGE] ?: writePermissionGranted
-            recordAudioPermissionGranted =
-                permissions[Manifest.permission.RECORD_AUDIO] ?: recordAudioPermissionGranted
-            allPermissionState.value = allPermissionGranted
-        }
-        updateOrRequestPermission()
+        updatePermission()
         setContent {
             AudioNotesTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    if (allPermissionState.value) {
-                        val audioViewModel = viewModel(
-                            modelClass = AudioViewModel::class.java
-                        )
+                    val audioViewModel = viewModel(
+                        modelClass = AudioViewModel::class.java
+                    )
+                    val dialogQueue = audioViewModel.visiblePermissionDialogQueue
+                    val multiplePermissionResultLauncher = rememberLauncherForActivityResult(
+                        contract = ActivityResultContracts.RequestMultiplePermissions(),
+                        onResult = { perms ->
+                            perms.keys.forEach { permission ->
+                                if (permission == Manifest.permission.RECORD_AUDIO && perms[permission] == true) {
+                                    recordAudioPermissionGranted.value = true
+                                }
+                                audioViewModel.onPermissionResult(
+                                    permission = permission,
+                                    isGranted = perms[permission] == true
+                                )
+                            }
+                        }
+                    )
 
+                    if (recordAudioPermissionGranted.value) {
                         InputDialog(
-                            title = "Название файла ",
+                            title = stringResource(id = R.string.dialog_input_filename_title),
                             state = audioViewModel.showFileNameDialog,
                             value = audioViewModel.currentAudioName,
                             onDismiss = audioViewModel::onDialogFileNameDismiss,
@@ -74,10 +77,11 @@ class MainActivity : ComponentActivity() {
                             state = audioViewModel.showDeleteConfirmationDialog,
                             text = stringResource(
                                 id = R.string.dialog_confirmation_delete_text,
-                                audioViewModel.audioToDelete.value?.displayName ?: 
-                                stringResource(id = R.string.unknown)
+                                audioViewModel.audioToDelete.value?.displayName
+                                    ?: stringResource(id = R.string.unknown)
                             ),
-                            onConfirm = audioViewModel::onDialogDeleteConfirmationConfirm)
+                            onConfirm = audioViewModel::onDialogDeleteConfirmationConfirm
+                        )
 
                         val audioList = audioViewModel.audioList
 
@@ -104,57 +108,71 @@ class MainActivity : ComponentActivity() {
                             onStopRecorder = {
                                 audioViewModel.stopRecordingAudio()
                             },
-                            onDeleteAudio = {audio ->
+                            onDeleteAudio = { audio ->
                                 audioViewModel.deleteAudio(audio)
                             }
                         )
                     } else {
-                        Box(contentAlignment = Alignment.Center) {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
                             Text(
-                                text = "Grant permission first to use this app",
+                                text = stringResource(id = R.string.no_permissions_text),
                                 style = MaterialTheme.typography.h6
                             )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(onClick = {
+                                multiplePermissionResultLauncher.launch(
+                                    arrayOf(Manifest.permission.RECORD_AUDIO)
+                                )
+                            }) {
+                                Text(text = stringResource(id = R.string.request_permissions))
+                            }
+                            dialogQueue.reversed().forEach { permission ->
+                                PermissionDialog(
+                                    permission = when (permission) {
+                                        Manifest.permission.RECORD_AUDIO -> {
+                                            RecordAudioPermissionTextProvider()
+                                        }
+                                        else -> return@forEach
+                                    },
+                                    isPermanentlyDeclined = !shouldShowRequestPermissionRationale(
+                                        permission
+                                    ),
+                                    onConfirm = {
+                                        audioViewModel.dismissPermissionDialog()
+                                        multiplePermissionResultLauncher.launch(
+                                            arrayOf(permission)
+                                        )
+                                    },
+                                    onDismiss = audioViewModel::dismissPermissionDialog,
+                                    onGoToAppSettingsClick = ::openAppSettings
+                                )
+                            }
+
                         }
                     }
-
                 }
             }
         }
     }
 
-
-    private fun updateOrRequestPermission() {
-        val hasReadPermission = ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.READ_EXTERNAL_STORAGE
-        ) == PackageManager.PERMISSION_GRANTED
-        val hasWritePermission = ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-        ) == PackageManager.PERMISSION_GRANTED
+    private fun updatePermission() {
         val hasRecordAudioPermission = ContextCompat.checkSelfPermission(
             this,
             Manifest.permission.RECORD_AUDIO
         ) == PackageManager.PERMISSION_GRANTED
-        val minSdk29 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+        recordAudioPermissionGranted.value = hasRecordAudioPermission
+    }
+}
 
-        readPermissionGranted = hasReadPermission
-        writePermissionGranted = hasWritePermission || minSdk29
-        recordAudioPermissionGranted = hasRecordAudioPermission
-
-        val permissionsToRequest = mutableListOf<String>()
-        if (!writePermissionGranted) {
-            permissionsToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        }
-        if (!readPermissionGranted) {
-            permissionsToRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE)
-        }
-        if (!recordAudioPermissionGranted) {
-            permissionsToRequest.add(Manifest.permission.RECORD_AUDIO)
-        }
-        if (permissionsToRequest.isNotEmpty()) {
-            permissionLauncher.launch(permissionsToRequest.toTypedArray())
-        }
-        allPermissionState.value = allPermissionGranted
+fun Activity.openAppSettings() {
+    Intent(
+        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+        Uri.fromParts("package", packageName, null)
+    ).also {
+        startActivity(it)
     }
 }
