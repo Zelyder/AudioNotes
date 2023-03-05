@@ -11,14 +11,15 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zelyder.audionotes.media.service.HomeScreen
 import com.zelyder.audionotes.ui.audio.AudioViewModel
+import com.zelyder.audionotes.ui.components.ConfirmDialog
 import com.zelyder.audionotes.ui.components.InputDialog
 import com.zelyder.audionotes.ui.theme.AudioNotesTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -61,14 +62,22 @@ class MainActivity : ComponentActivity() {
                             modelClass = AudioViewModel::class.java
                         )
 
-
                         InputDialog(
                             title = "Название файла ",
-                            state = audioViewModel.showDialog,
+                            state = audioViewModel.showFileNameDialog,
                             value = audioViewModel.currentAudioName,
-                            onDismiss = audioViewModel::onDialogDismiss,
-                            onConfirm = audioViewModel::onDialogConfirm,
+                            onDismiss = audioViewModel::onDialogFileNameDismiss,
+                            onConfirm = audioViewModel::onDialogFileNameConfirm,
                         )
+                        ConfirmDialog(
+                            title = stringResource(id = R.string.dialog_confirmation_title),
+                            state = audioViewModel.showDeleteConfirmationDialog,
+                            text = stringResource(
+                                id = R.string.dialog_confirmation_delete_text,
+                                audioViewModel.audioToDelete.value?.displayName ?: 
+                                stringResource(id = R.string.unknown)
+                            ),
+                            onConfirm = audioViewModel::onDialogDeleteConfirmationConfirm)
 
                         val audioList = audioViewModel.audioList
 
@@ -87,7 +96,7 @@ class MainActivity : ComponentActivity() {
                                 audioViewModel.playAudio(it)
                             },
                             onStartRecorder = {
-                                audioViewModel.onOpenDialogClicked()
+                                audioViewModel.showFileNameDialog.value = true
                             },
                             onStopRecorder = {
                                 audioViewModel.stopRecordingAudio()

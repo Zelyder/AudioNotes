@@ -2,6 +2,7 @@ package com.zelyder.audionotes.ui.audio
 
 import android.support.v4.media.MediaBrowserCompat
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -27,9 +28,11 @@ class AudioViewModel @Inject constructor(
     var currentPlaybackPosition = mutableStateOf(0L)
     var currentAudioProgress = mutableStateOf(0f)
 
-    val showDialog = mutableStateOf(false)
+    val showFileNameDialog = mutableStateOf(false)
+    val showDeleteConfirmationDialog = mutableStateOf(false)
     val isRecordingAudio = mutableStateOf(false)
     val currentAudioName = mutableStateOf(defaultAudioName)
+    val audioToDelete: MutableState<Audio?> = mutableStateOf(null)
 
 
     lateinit var rootMediaId: String
@@ -87,13 +90,9 @@ class AudioViewModel @Inject constructor(
     }
 
     fun deleteAudio(audio: Audio) {
-        viewModelScope.launch {
-            repository.deleteAudioFile(audio.title)
-            audioList -= audio
-            serviceConnection.refreshMediaBrowserChildren()
-        }
+        showDeleteConfirmationDialog.value = true
+        audioToDelete.value = audio
     }
-
 
     private fun startRecordingAudio(fileName: String) {
         viewModelScope.launch {
@@ -157,15 +156,21 @@ class AudioViewModel @Inject constructor(
         }
     }
 
-    fun onOpenDialogClicked() {
-        showDialog.value = true
+    fun onDialogDeleteConfirmationConfirm() {
+        viewModelScope.launch {
+            audioToDelete.value?.let {
+                repository.deleteAudioFile(it.title)
+                audioList -= it
+                serviceConnection.refreshMediaBrowserChildren()
+            }
+        }
     }
 
-    fun onDialogConfirm() {
+    fun onDialogFileNameConfirm() {
         startRecordingAudio(currentAudioName.value)
     }
 
-    fun onDialogDismiss() {
+    fun onDialogFileNameDismiss() {
         currentAudioName.value = defaultAudioName
     }
 

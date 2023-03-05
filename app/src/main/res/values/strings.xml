@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Audio notes</string>
+    <string name="unknown">Unknown</string>
+
 
     <!-- Notificaiton Channel -->
     <string name="notification_channel">Now Playing</string>
@@ -13,6 +15,14 @@
     <!-- Time format -->
     <string name="full_date_format">MM.dd.yyyy at HH:mm</string>
     <string name="today_date_format">today at HH:mm</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_confirm">OK</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="dialog_confirmation_title">Confirm action</string>
+    <string name="dialog_confirmation_delete_text">Are you sure to delete %s?</string>
 
     <!-- Error messages -->
     <string name="error_media_not_found">Could not locate requested media.</string>

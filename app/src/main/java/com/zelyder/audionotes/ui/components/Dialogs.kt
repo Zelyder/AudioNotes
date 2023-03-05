@@ -8,7 +8,9 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.zelyder.audionotes.R
 
 @Composable
 fun CommonDialog(
@@ -16,6 +18,8 @@ fun CommonDialog(
     state: MutableState<Boolean>,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
+    confirmText: String = stringResource(id = R.string.dialog_confirm),
+    cancelText: String = stringResource(id = R.string.dialog_cancel),
     content: @Composable (() -> Unit)? = null
 ) {
     if (state.value){
@@ -41,7 +45,7 @@ fun CommonDialog(
                     onDismiss()
                     state.value = false
                 }) {
-                    Text("Cancel")
+                    Text(text = cancelText)
                 }
             },
             confirmButton = {
@@ -49,7 +53,7 @@ fun CommonDialog(
                     onConfirm()
                     state.value = false
                 }) {
-                    Text("Ok")
+                    Text(text = confirmText)
                 }
             }, modifier = Modifier.padding(vertical = 8.dp)
         )
@@ -76,6 +80,27 @@ fun InputDialog(
         ) {
             TextField(value = value.value, onValueChange = { value.value = it })
         }
+    }
+
+}
+
+@Composable
+fun ConfirmDialog(
+    title: String?,
+    state: MutableState<Boolean>,
+    text: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit = {}
+) {
+    CommonDialog(
+        title = title,
+        state = state,
+        onDismiss = onDismiss,
+        onConfirm = onConfirm,
+        confirmText = stringResource(id = R.string.yes),
+        cancelText = stringResource(id = R.string.no)
+    ) {
+        Text(text = text)
     }
 
 }
