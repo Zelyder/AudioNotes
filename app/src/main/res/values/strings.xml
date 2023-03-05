@@ -29,6 +29,8 @@
         record permission. This app needs access to your microphone so that your can add recording. You can go to the settings to grant it.</string>
     <string name="permission_record_audio_text">This app needs access to your microphone so         that your can add recording.</string>
 
+    <!-- Vk -->
+    <string name="auth_vk">Authorization via VK</string>
 
     <!-- Dialogs -->
     <string name="dialog_confirm">OK</string>
@@ -43,6 +45,5 @@
     <!-- Error messages -->
     <string name="error_media_not_found">Could not locate requested media.</string>
     <string name="generic_error">The application has encountered an unexpected error.</string>
-
 
 </resources>
