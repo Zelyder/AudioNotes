@@ -20,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -120,7 +121,8 @@ class MainActivity : ComponentActivity() {
                         ) {
                             Text(
                                 text = stringResource(id = R.string.no_permissions_text),
-                                style = MaterialTheme.typography.h6
+                                style = MaterialTheme.typography.h6,
+                                textAlign = TextAlign.Center
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Button(onClick = {
@@ -128,7 +130,7 @@ class MainActivity : ComponentActivity() {
                                     arrayOf(Manifest.permission.RECORD_AUDIO)
                                 )
                             }) {
-                                Text(text = stringResource(id = R.string.request_permissions))
+                                Text(text = stringResource(id = R.string.grant_permission))
                             }
                             dialogQueue.reversed().forEach { permission ->
                                 PermissionDialog(

@@ -19,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.zelyder.audionotes.R
 import com.zelyder.audionotes.data.model.Audio
 import java.text.SimpleDateFormat
@@ -165,15 +166,20 @@ fun RecordingTimer(
 }
 
 
-private fun formatDate(timestamp: Long): String {
-    val dateFormat = SimpleDateFormat("MM.dd.yyyy в HH:mm", Locale.getDefault())
-    val todayFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+private fun formatDate(
+    timestamp: Long,
+    datePattern: String,
+    todayPattern: String,
+    todayText: String
+): String {
+    val dateFormat = SimpleDateFormat(datePattern, Locale.getDefault())
+    val todayFormat = SimpleDateFormat(todayPattern, Locale.getDefault())
     dateFormat.timeZone = TimeZone.getTimeZone("UTC")
     val date = Date(timestamp)
     val today = Calendar.getInstance().apply { time = Date() }
     val timestampDay = Calendar.getInstance().apply { time = date }
     return if (today.get(Calendar.DAY_OF_YEAR) == timestampDay.get(Calendar.DAY_OF_YEAR)) {
-        "Сегодня в ${todayFormat.format(date)}"
+        "$todayText ${todayFormat.format(date)}"
     } else {
         dateFormat.format(date)
     }
@@ -219,7 +225,12 @@ fun AudioItem(
                         maxLines = 1
                     )
                     Text(
-                        text = formatDate(audio.date),
+                        text = formatDate(
+                            timestamp = audio.date,
+                            datePattern = stringResource(id = R.string.full_date_format),
+                            todayText = stringResource(id = R.string.today_date_text),
+                            todayPattern = stringResource(id = R.string.today_date_format)
+                        ),
                         color = Color.Gray,
                         overflow = TextOverflow.Clip,
                         maxLines = 1
@@ -233,11 +244,19 @@ fun AudioItem(
                     if (progress > 0) {
                         Text(
                             text = timeStampToDuration(currentPoint),
-                            style = MaterialTheme.typography.subtitle1
+                            style = MaterialTheme.typography.subtitle1,
+                            fontSize = 14.sp
                         )
-                        Text(text = "/", color = Color.Gray)
+                        Text(
+                            text = stringResource(id = R.string.time_separator),
+                            color = Color.Gray,
+                            fontSize = 14.sp
+                        )
                     }
-                    Text(text = timeStampToDuration(audio.duration), color = Color.Gray)
+                    Text(
+                        text = timeStampToDuration(audio.duration), color = Color.Gray,
+                        fontSize = 14.sp
+                    )
                     Spacer(modifier = Modifier.width(8.dp))
                     Image(
                         modifier = Modifier
@@ -254,7 +273,7 @@ fun AudioItem(
             }
             if (isCurrentAudio) {
                 Slider(
-                    value = progress, //((audio.currentPoint * 100) / audio.duration)
+                    value = progress,
                     onValueChange = { onProgressChange.invoke(it) },
                     valueRange = 0f..100f
                 )
@@ -275,96 +294,3 @@ private fun timeStampToDuration(position: Long): String {
 
 
 }
-
-//val audioList = listOf(
-//    Audio(
-//        id = 1,
-//        uri = Uri.EMPTY,
-//        displayName = "Поход к адвокату",
-//        title = "Поход к адвокату",
-//        date = 1677563425,
-//        duration = 332000,
-//    ),
-//    Audio(
-//        id = 2,
-//        uri = Uri.EMPTY,
-//        displayName = "Разговор с Иваном",
-//        title = "Разговор с Иваном",
-//        date = 1646043085,
-//        duration = 151000,
-//    ),
-//    Audio(
-//        id = 3,
-//        uri = Uri.EMPTY,
-//        displayName = "Куртой трек - надо найти!",
-//        title = "Куртой трек - надо найти!",
-//        date = 1677563425,
-//        duration = 232000,
-//    )
-//)
-//
-//@Preview(showBackground = true)
-//@Composable
-//fun DefaultPreview() {
-//    AudioNotesTheme {
-//        AudioItem(
-//            audio = audioList.first(),
-//            isPlaying = false,
-//            isCurrentAudio = true,
-//            onProgressChange = {},
-//            onItemClick = {}
-//        )
-//    }
-//}
-//
-//@Preview(showBackground = true)
-//@Composable
-//fun DefaultPreview2() {
-//    AudioNotesTheme {
-//        AudioItem(
-//            audio = audioList.first(),
-//            isPlaying = true,
-//            isCurrentAudio = true,
-//            onProgressChange = {},
-//            onItemClick = {},
-//            progress = 50f,
-//            currentPoint = audioList.first().duration / 2
-//        )
-//    }
-//}
-
-//
-//@Preview(showBackground = true, showSystemUi = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
-//@Composable
-//fun RecordingsScreenDarkPreview() {
-//    AudioNotesTheme {
-//        HomeScreen(
-//            audioList = audioList,
-//            progress = 50f,
-//            currentPoint = audioList.first().duration / 2,
-//            onProgressChange = {},
-//            isAudioPlaying = true,
-//            currentPlayingAudio = audioList.first(),
-//            onStart = {},
-//            onNext = {},
-//            recorder = null
-//        )
-//    }
-//}
-//
-//@Preview(showBackground = true, showSystemUi = true)
-//@Composable
-//fun RecordingsScreenPreview() {
-//    AudioNotesTheme {
-//        HomeScreen(
-//            audioList = audioList,
-//            progress = 50f,
-//            currentPoint = audioList.first().duration / 2,
-//            onProgressChange = {},
-//            isAudioPlaying = true,
-//            currentPlayingAudio = audioList.first(),
-//            onStart = {},
-//            onNext = {},
-//        )
-//    }
-//}

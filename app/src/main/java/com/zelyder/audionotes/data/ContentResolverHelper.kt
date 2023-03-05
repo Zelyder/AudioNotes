@@ -22,6 +22,7 @@ constructor(@ApplicationContext val context: Context) {
 
     private var lastAudioFile: File? = null
     private var index = 0L
+
     @WorkerThread
     fun getAudioData(): List<Audio> {
         return loadAudioFromInternalStorage()
@@ -50,7 +51,7 @@ constructor(@ApplicationContext val context: Context) {
                 timestamp = sdf.parse(date)?.time ?: 0L
             }
             if (timestamp > 0) {
-                timestamp += 10800000       // + 3 часа
+                timestamp += 10800000       // + 3 hours
             }
             Audio(
                 uri = uri,

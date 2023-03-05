@@ -4,7 +4,7 @@
     <string name="home_screen_title">Your recordings</string>
 
 
-    <!-- Notificaiton Channel -->
+    <!-- Notification Channel -->
     <string name="notification_channel">Now Playing</string>
     <string name="notification_channel_description">Shows what music is currently playing in our App</string>
 
@@ -18,15 +18,16 @@
     <string name="recording_start">Start recording</string>
     <!-- Time format -->
     <string name="full_date_format">MM.dd.yyyy at HH:mm</string>
-    <string name="today_date_format">today at HH:mm</string>
+    <string name="today_date_format" translatable="false">HH:mm</string>
+    <string name="today_date_text">today at</string>
+    <string name="time_separator" translatable="false">/</string>
     <!-- Permissions -->
     <string name="no_permissions_text">Grant permissions first to use this app</string>
     <string name="request_permissions">Request permissions</string>
     <string name="grant_permission">Grant permission</string>
     <string name="permission_record_audio_permanently_text">It seems you permanently declined audio
-        record permission. You can go to the settings to grant it.</string>
-    <string name="permission_record_audio_text">This app needs access to your microphone so
-        that your can add recording.</string>
+        record permission. This app needs access to your microphone so that your can add recording. You can go to the settings to grant it.</string>
+    <string name="permission_record_audio_text">This app needs access to your microphone so         that your can add recording.</string>
 
 
     <!-- Dialogs -->
