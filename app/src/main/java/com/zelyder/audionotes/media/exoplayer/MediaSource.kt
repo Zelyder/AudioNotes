@@ -15,7 +15,7 @@ class MediaSource
 @Inject constructor(private val repository: AudioRepository) {
     private val onReadyListeners: MutableList<OnReadyListener> = mutableListOf()
 
-    var audioMediaMetaData: List<MediaMetadataCompat> = emptyList()
+    var audioMediaMetaDataList: List<MediaMetadataCompat> = emptyList()
 
     private var state: AudioSourceState = AudioSourceState.STATE_CREATED
         set(value) {
@@ -36,7 +36,7 @@ class MediaSource
     suspend fun load() {
         state = AudioSourceState.STATE_INITIALIZING
         val data = repository.getAudioData()
-        audioMediaMetaData = data.map { audio ->
+        audioMediaMetaDataList = data.map { audio ->
             MediaMetadataCompat.Builder()
                 .putString(
                     MediaMetadataCompat.METADATA_KEY_MEDIA_ID,
@@ -63,9 +63,9 @@ class MediaSource
         state = AudioSourceState.STATE_INITIALIZED
     }
 
-    fun asMediaSource(dataSource: CacheDataSource.Factory): ConcatenatingMediaSource {
+    fun asMediaSourcePlaylist(dataSource: CacheDataSource.Factory): ConcatenatingMediaSource {
         val concatenatingMediaSource = ConcatenatingMediaSource()
-        audioMediaMetaData.forEach { mediaMetadataCompat ->
+        audioMediaMetaDataList.forEach { mediaMetadataCompat ->
             val mediaItem = MediaItem.fromUri(
                 mediaMetadataCompat
                     .getString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI)
@@ -81,7 +81,7 @@ class MediaSource
         return concatenatingMediaSource
     }
 
-    fun asMediaItem() = audioMediaMetaData.map { metaData ->
+    fun asMediaItem() = audioMediaMetaDataList.map { metaData ->
         val description = MediaDescriptionCompat.Builder()
             .setTitle(metaData.description.title)
             .setMediaId(metaData.description.mediaId)
@@ -90,12 +90,6 @@ class MediaSource
             .build()
         MediaBrowserCompat.MediaItem(description, FLAG_PLAYABLE)
     }.toMutableList()
-
-    fun refresh() {
-        onReadyListeners.clear()
-        state = AudioSourceState.STATE_CREATED
-    }
-
 
     fun whenReady(listener: OnReadyListener): Boolean {
         return if (

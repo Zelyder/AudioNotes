@@ -55,22 +55,6 @@ class MediaPlayerServiceConnection @Inject constructor(
         mediaBrowser.sendCustomAction(AppConst.START_MEDIA_PLAY_ACTION, null, null)
     }
 
-    fun fastForward(seconds: Int = 10) {
-        playbackState.value?.currentPosition?.let {
-            transportControl.seekTo(it + seconds * 1000)
-        }
-    }
-
-    fun rewind(seconds: Int = 10) {
-        playbackState.value?.currentPosition?.let {
-            transportControl.seekTo(it - seconds * 1000)
-        }
-    }
-
-    fun skipToNext() {
-        transportControl.skipToNext()
-    }
-
     fun subscribe(
         parentId: String,
         callback: MediaBrowserCompat.SubscriptionCallback
@@ -121,7 +105,7 @@ class MediaPlayerServiceConnection @Inject constructor(
             super.onMetadataChanged(metadata)
             currentPlayingAudio.value = metadata?.let { data ->
                 audioList.find { audio ->
-                    audio.id.toString() == data.description.mediaId
+                    audio.uri == data.description.mediaUri
                 }
             }
         }

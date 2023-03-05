@@ -11,6 +11,7 @@ import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.util.Log
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.media.MediaBrowserServiceCompat
@@ -140,8 +141,9 @@ class MediaPlayerService : MediaBrowserServiceCompat() {
                 mediaPlayerNotificationManager.showNotification(exoPlayer)
             }
             AppConst.REFRESH_MEDIA_PLAY_ACTION -> {
-                mediaSource.refresh()
-                notifyChildrenChanged(AppConst.MEDIA_ROOT_ID)
+                serviceScope.launch {
+                    mediaSource.load()
+                }
             }
             else -> Unit
         }
@@ -197,7 +199,10 @@ class MediaPlayerService : MediaBrowserServiceCompat() {
 
         override fun getSupportedPrepareActions(): Long =
             PlaybackStateCompat.ACTION_PREPARE_FROM_MEDIA_ID or
-                    PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID
+                    PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID or
+                    PlaybackStateCompat.ACTION_PLAY_FROM_URI or
+                    PlaybackStateCompat.ACTION_PREPARE_FROM_URI
+
 
         override fun onPrepare(playWhenReady: Boolean) = Unit
 
@@ -207,13 +212,13 @@ class MediaPlayerService : MediaBrowserServiceCompat() {
             extras: Bundle?
         ) {
             mediaSource.whenReady {
-                val itemToPlay = mediaSource.audioMediaMetaData.find {
+                val itemToPlay = mediaSource.audioMediaMetaDataList.find {
                     it.description.mediaId == mediaId
                 }
                 currentPlayingMedia = itemToPlay
 
                 preparePlayer(
-                    mediaMetadata = mediaSource.audioMediaMetaData,
+                    mediaMetadata = mediaSource.audioMediaMetaDataList,
                     itemToPlay = itemToPlay,
                     playWhenReady = playWhenReady
                 )
@@ -230,7 +235,24 @@ class MediaPlayerService : MediaBrowserServiceCompat() {
             uri: Uri,
             playWhenReady: Boolean,
             extras: Bundle?
-        ) = Unit
+        ) {
+            Log.d("Prepare", "onPrepareFromUri $uri")
+            mediaSource.whenReady {
+                val itemToPlay = mediaSource.audioMediaMetaDataList.find {
+                    Log.d("Prepare", "${it.description.mediaUri} == $uri")
+                    it.description.mediaUri == uri
+                }
+
+                currentPlayingMedia = itemToPlay
+
+                preparePlayer(
+                    mediaMetadata = mediaSource.audioMediaMetaDataList,
+                    itemToPlay = itemToPlay,
+                    playWhenReady = playWhenReady
+                )
+            }
+
+        }
 
     }
 
@@ -241,8 +263,8 @@ class MediaPlayerService : MediaBrowserServiceCompat() {
             player: Player,
             windowIndex: Int
         ): MediaDescriptionCompat {
-            if (windowIndex < mediaSource.audioMediaMetaData.size) {
-                return mediaSource.audioMediaMetaData[windowIndex].description
+            if (windowIndex < mediaSource.audioMediaMetaDataList.size) {
+                return mediaSource.audioMediaMetaDataList[windowIndex].description
             }
             return MediaDescriptionCompat.Builder().build()
         }
@@ -256,8 +278,9 @@ class MediaPlayerService : MediaBrowserServiceCompat() {
         val indexToPlay = if (currentPlayingMedia == null) 0
         else mediaMetadata.indexOf(itemToPlay)
 
+
         exoPlayer.addListener(PlayerEventListener())
-        exoPlayer.setMediaSource(mediaSource.asMediaSource(dataSourceFactory))
+        exoPlayer.setMediaSource(mediaSource.asMediaSourcePlaylist(dataSourceFactory))
         exoPlayer.prepare()
         exoPlayer.seekTo(indexToPlay, 0)
         exoPlayer.playWhenReady = playWhenReady

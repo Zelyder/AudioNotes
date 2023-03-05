@@ -90,6 +90,7 @@ class AudioViewModel @Inject constructor(
         viewModelScope.launch {
             repository.deleteAudioFile(audio.title)
             audioList -= audio
+            serviceConnection.refreshMediaBrowserChildren()
         }
     }
 
@@ -108,6 +109,7 @@ class AudioViewModel @Inject constructor(
             repository.getLastAudio()?.let {
                 audioList += it
                 Log.d("audio", "Добавление $it")
+                serviceConnection.refreshMediaBrowserChildren()
             }
         }
     }
@@ -121,27 +123,11 @@ class AudioViewModel @Inject constructor(
                 serviceConnection.transportControl.play()
             }
         } else {
-            serviceConnection.transportControl.playFromMediaId(
-                currentAudio.id.toString(),
+            serviceConnection.transportControl.playFromUri(
+                currentAudio.uri,
                 null
             )
         }
-    }
-
-    fun stopPlayback() {
-        serviceConnection.transportControl.stop()
-    }
-
-    fun fastForward() {
-        serviceConnection.fastForward()
-    }
-
-    fun rewind() {
-        serviceConnection.rewind()
-    }
-
-    fun skipToNext() {
-        serviceConnection.skipToNext()
     }
 
     fun seekTo(value: Float) {
