@@ -7,9 +7,11 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
@@ -26,6 +28,9 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.vk.api.sdk.VK
+import com.vk.api.sdk.auth.VKAuthenticationResult
+import com.vk.api.sdk.auth.VKScope
 import com.zelyder.audionotes.ui.audio.AudioViewModel
 import com.zelyder.audionotes.ui.audio.HomeScreen
 import com.zelyder.audionotes.ui.components.ConfirmDialog
@@ -38,7 +43,17 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    companion object {
+        val TAG: String = this::class.java.simpleName
+    }
+
     private var recordAudioPermissionGranted = mutableStateOf(false)
+    lateinit var authLauncher: ActivityResultLauncher<Collection<VKScope>>
+
+    override fun onStart() {
+        super.onStart()
+        vkAuth()
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         updatePermission()
@@ -162,6 +177,21 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    fun vkAuth() {
+        authLauncher = VK.login(this) { result : VKAuthenticationResult ->
+            when (result) {
+                is VKAuthenticationResult.Success -> {
+                    Log.d(TAG, "VKAuthenticationResult.Success")
+                }
+                is VKAuthenticationResult.Failed -> {
+                    // User didn't pass authorization
+                    Log.d(TAG, "VKAuthenticationResult.Failed")
+                }
+            }
+        }
+
     }
 
     @Composable

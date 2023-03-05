@@ -69,6 +69,11 @@ dependencies {
     implementation "com.google.android.exoplayer:extension-mediasession:$exoplayer"
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleCompose"
     implementation "com.google.accompanist:accompanist-systemuicontroller:0.28.0"
+
+    // VK SDK
+    implementation "com.vk:android-sdk-core:$vk_sdk_version"
+    implementation "com.vk:android-sdk-api:$vk_sdk_version"
+
     kapt "com.google.dagger:hilt-compiler:2.44"
 
 
